@@ -3,7 +3,6 @@
 // NOTE: TextComplete plugin has contenteditable support but it does not work
 //       fine especially on old IEs.
 //       Any pull requests are REALLY welcome.
-
 'use strict';
 
 var Adapter = require('./Adapter'),

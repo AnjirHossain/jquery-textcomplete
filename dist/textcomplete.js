@@ -225,7 +225,7 @@ Object.assign(Completer.prototype, {
     this.adapter = new Adapter(el, this, this.options);
   },
 
-  // TODO
+  // TODO: complete implementation? 
   destroy: function() {
     if (this.adapter)  {
       this.adapter.destroy();
@@ -329,13 +329,11 @@ Object.assign(Completer.prototype, {
     return [];
   },
 
-  /* POTENTIAL SUSPECT */
   // Call the search method of selected strategy..
   _search: util.lock(function(free, strategy, term, match) {
     var self = this;
 
     strategy.search(term, function(data, stillSearching) {
-
       if (!self.dropdown.shown) {
         self.dropdown.activate();
       }
@@ -347,14 +345,12 @@ Object.assign(Completer.prototype, {
       }
 
       self.dropdown.setPosition(self.adapter.getCaretPosition());
-
       self.dropdown.render(self._zip(data, strategy, term));
 
       if (!stillSearching) {      // The last callback in the current lock.
         free();
         self._clearAtNext = true; // Call dropdown.clear at the next time.
       }
-
     }, match);
 
   }),
@@ -387,6 +383,7 @@ module.exports = Completer;
 'use strict';
 
 var util = require('./util');
+var COMMANDS = require('./commands');
 
 var dropdownViews = {};
 
@@ -398,8 +395,6 @@ document.addEventListener('click', function(e) {
     if (key !== id) view.deactivate();
   })
 });
-
-var COMMANDS = require('./commands');
 
 var OPTIONS = ['maxCount', 'placement', 'footer', 'header',
   'noResultsMessage', 'className'];
@@ -886,8 +881,6 @@ Object.assign(Dropdown.prototype, {
   _renderHeader: function(unzippedData) {
     if (this.header) {
       if (!this._$header) {
-
-        // suspect: translation loss form jq to native js
         var headerEl = document.createElement('li');
         headerEl.classList.add('textcomplete-header');
         this._$header = this.el.insertBefore(headerEl, this.el.firstChild);
@@ -959,13 +952,6 @@ Object.assign(Dropdown.prototype, {
 
     // If the 'placement' option set to 'top', move the position above the element.
     if (this.placement === 'top') {
-      // Overwrite the position object to set the 'bottom' property instead of the top.
-      // position = {
-      //   top: 'auto',
-      //   bottom: this.el.parentNode.style.height - position.top + position.lineHeight + 'px',
-      //   left: position.left + 'px'
-      // }
-
       appliedPosition = {
         top: 'auto',
         bottom: this.el.parentNode.style.height - position.top + position.lineHeight + 'px',
@@ -974,7 +960,7 @@ Object.assign(Dropdown.prototype, {
       }
     } else {
       appliedPosition = {
-        top: position.top + (position.lineHeight/2) + 'px',
+        top: (position.lineHeight) ? position.top + (position.lineHeight/2) + 'px' : position.top + 'px',
         bottom: 'auto',
         left: position.left + 'px'
       }
@@ -982,14 +968,10 @@ Object.assign(Dropdown.prototype, {
 
     /* Needs review */
     if (this.placement === 'absleft') {
-      position.left = 0;
-
-      console.log('[y:if] position: ', position);
+      appliedPosition.left = 0 + 'px';
     } else if (this.placement === 'absright') {
-      position.right = 0;
-      position.left = 'auto';
-
-      console.log('[y:else] position: ', position);
+      appliedPosition.right = 0 + 'px';
+      appliedPosition.left = 'auto';
     }
 
     return appliedPosition;
@@ -1163,7 +1145,6 @@ module.exports = Adapter;
 // NOTE: TextComplete plugin has contenteditable support but it does not work
 //       fine especially on old IEs.
 //       Any pull requests are REALLY welcome.
-
 'use strict';
 
 var Adapter = require('./Adapter'),
@@ -1388,6 +1369,7 @@ Object.assign(Textarea.prototype, Adapter.prototype, {
   // ---------------
   _getCaretRelativePosition: function() {
     var p = getCaretCoordinates(this.el, this.el.selectionStart);
+
     return {
       top:  p.top + this._calculateLineHeight() - this.el.scrollTop,
       left: p.left - this.el.scrollLeft

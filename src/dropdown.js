@@ -501,8 +501,6 @@ Object.assign(Dropdown.prototype, {
   _renderHeader: function(unzippedData) {
     if (this.header) {
       if (!this._$header) {
-
-        // suspect: translation loss form jq to native js
         var headerEl = document.createElement('li');
         headerEl.classList.add('textcomplete-header');
         this._$header = this.el.insertBefore(headerEl, this.el.firstChild);
@@ -574,13 +572,6 @@ Object.assign(Dropdown.prototype, {
 
     // If the 'placement' option set to 'top', move the position above the element.
     if (this.placement === 'top') {
-      // Overwrite the position object to set the 'bottom' property instead of the top.
-      // position = {
-      //   top: 'auto',
-      //   bottom: this.el.parentNode.style.height - position.top + position.lineHeight + 'px',
-      //   left: position.left + 'px'
-      // }
-
       appliedPosition = {
         top: 'auto',
         bottom: this.el.parentNode.style.height - position.top + position.lineHeight + 'px',
@@ -589,7 +580,7 @@ Object.assign(Dropdown.prototype, {
       }
     } else {
       appliedPosition = {
-        top: position.top + (position.lineHeight/2) + 'px',
+        top: (position.lineHeight) ? position.top + (position.lineHeight/2) + 'px' : position.top + 'px',
         bottom: 'auto',
         left: position.left + 'px'
       }
@@ -597,14 +588,10 @@ Object.assign(Dropdown.prototype, {
 
     /* Needs review */
     if (this.placement === 'absleft') {
-      position.left = 0;
-
-      console.log('[y:if] position: ', position);
+      appliedPosition.left = 0 + 'px';
     } else if (this.placement === 'absright') {
-      position.right = 0;
-      position.left = 'auto';
-
-      console.log('[y:else] position: ', position);
+      appliedPosition.right = 0 + 'px';
+      appliedPosition.left = 'auto';
     }
 
     return appliedPosition;

@@ -45,6 +45,7 @@ Object.assign(Textarea.prototype, Adapter.prototype, {
   // ---------------
   _getCaretRelativePosition: function() {
     var p = getCaretCoordinates(this.el, this.el.selectionStart);
+
     return {
       top:  p.top + this._calculateLineHeight() - this.el.scrollTop,
       left: p.left - this.el.scrollLeft
